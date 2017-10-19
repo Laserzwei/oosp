@@ -1,22 +1,20 @@
 package.path = package.path .. ";data/scripts/lib/?.lua"
-package.path = package.path .. ";data/scripts/?.lua"
+package.path = package.path .. ";mods/oosp/scripts/lib/oosproductionLib.lua"
 require ("oosproductionLib")
 require ("utility")
 require ("goods")
 require ("productions")
 require ("galaxy")
 
-IGNOREVESIONCHECK = true                    --change as required     
+IGNOREVESIONCHECK = true                    --change as required
 INCLUDEPLAYERS = false
 DEBUGLEVEL = 2
 
                                             -- do not change below
-MOD = "[OOSP]"                                
+MOD = "[OOSP]"
 VERSION = "[0.9_91] "
 local timeString = "online_time"
 
---SectorGenerator = require("SectorGenerator")--remove
---PlanGenerator = require ("plangenerator")--remove
 Placer = require("placer")
 local usesRightVersion = false
 local derefferedTimeout = 20                    -- in seconds
@@ -40,25 +38,25 @@ function initialize()
         local unregisterOnPlayerLogOffValue = Server():unregisterCallback("onPlayerLogOff", "onPlayerLogOff")
 
         debugPrint(3,"Event cleanup: "..tostring(unregisterOnSectorLeftValue).." | "..tostring(unregisterOnSectorEnteredValue).." | "..tostring(unregisterOnPlayerLogOffValue).." Expected: 0|0|0")
-        
+
         playerIndex = Faction().index
         if playerIndex ~= nil and IGNOREVESIONCHECK == false then
             Player(): sendChatMessage("Sever", 2, "Waiting to receive version. Try not to Jump. This takes about 20 seconds!")
             deferredCallback(derefferedTimeout, "dCheck", playerIndex)
         end
-        
+
         if playerIndex ~= nil and IGNOREVESIONCHECK == true then
             usesRightVersion = true
             registerPlayer(playerIndex)
         end
-        
+
         --begin registering events for a fresh start
         Server():registerCallback("onPlayerLogOff", "onPlayerLogOff")
-        
+
     else
         debugPrint(3, "client init")
     end
-    
+
 end
 --dereffered check, because invoking a client function on init is not possible
 function dCheck(playerIndex)
@@ -90,7 +88,7 @@ function processVersion(playerIndex, version)
         if hasBeenChecked == true then return end
         hasBeenChecked = true
         local name
-        if version == nil then 
+        if version == nil then
             version = "No Version received"
         end
         name = Player().name
@@ -128,7 +126,7 @@ function sendMoreMessages(playerIndex, version)
     debugPrint(2, "Remembered "..name.." that he is using the wrong version: "..version)
     deferredCallback(10,"sendMoreMessages",playerIndex, version)
 end
- 
+
  function registerPlayer(playerIndex)
     local player = Player(playerIndex)
     Server():registerCallback("onPlayerLogOff", "onPlayerLogOff")
@@ -143,7 +141,7 @@ function onPlayerLogIn(playerIndex)
     if Player(playerIndex).name ~= Player().name then            --wrong player called
         return
     end
-    if usesRightVersion == false then 
+    if usesRightVersion == false then
         onPlayerLogOff(playerIndex)
         return
     end
@@ -152,7 +150,7 @@ function onPlayerLogIn(playerIndex)
     onSectorEntered(playerIndex, x, y)
 end
 
-function onPlayerLogOff(playerIndex)--Initialize gets called on PlayerLogIn     
+function onPlayerLogOff(playerIndex)--Initialize gets called on PlayerLogIn
     if Player(playerIndex).name ~= Player().name then            --wrong player called
         debugPrint(1, "Wrong Player Logoff")
         return
@@ -162,20 +160,20 @@ function onPlayerLogOff(playerIndex)--Initialize gets called on PlayerLogIn
     local unregisterOnSectorEnteredValue = Player():unregisterCallback("onSectorEntered", "onSectorEntered")
 
     debugPrint(3, "Event unregisteration: "..tostring(unregisterOnSectorLeftValue).." | "..tostring(unregisterOnSectorEnteredValue))
-    debugPrint(0, "======oos unloading Player "..Player(playerIndex).name.."======") 
+    debugPrint(0, "======oos unloading Player "..Player(playerIndex).name.."======")
     local x,y = Sector():getCoordinates()
     debugPrint(2, Player(playerIndex).name .. " " .. x .. ":" .. y)
     onSectorLeft(playerIndex, x, y)
 end
 
 --sets a Timestamp when the last player leaves the Sector
-function onSectorLeft(playerIndex, x, y) 
+function onSectorLeft(playerIndex, x, y)
     if Player(playerIndex).name ~= Player().name then            --wrong player called
         return
     end
-    local numplayer = Sector().numPlayers       
+    local numplayer = Sector().numPlayers
     local galaxyTickName = timeString
-    
+
     if(numplayer <=1) then   -- we only need a new timestamp when a sector gets unloaded. The player is still in sector when the Hook calls, thus we check for mor remaining players
         local timestamp = Sector():getValue("oosTimestamp")
         if timestamp ~= nil then --update Timestamp
@@ -187,11 +185,11 @@ function onSectorLeft(playerIndex, x, y)
             Sector():setValue("oosTimestamp", timestamp)
             debugPrint(2, "Sector get first timestamp: ".. timestamp .. " | ".. x .. ":" .. y)
         end
-    end   
+    end
 end
-
+--Test
 --Is there a timestamp on which we can work?-Then do so.
-function onSectorEntered(playerIndex, x, y) 
+function onSectorEntered(playerIndex, x, y)
     if Player(playerIndex).name ~= Player().name then            --wrong player called
         return
     end
@@ -200,7 +198,7 @@ function onSectorEntered(playerIndex, x, y)
     sector = Sector()
     local stations = {sector:getEntitiesByType(EntityType.Station)}
     local ships = {sector:getEntitiesByType(EntityType.Ship)}
-    if INCLUDEPLAYERS == false then 
+    if INCLUDEPLAYERS == false then
         for _,station in pairs(stations) do
             if station ~= nil and station.factionIndex ~= nil then
                 if Faction(station.factionIndex).isPlayer then
@@ -211,7 +209,7 @@ function onSectorEntered(playerIndex, x, y)
                 debugPrint(2,"Found Factionless station", nil, station.name)
             end
         end
-        
+
         for _,ship in pairs(ships) do
             if ship.factionIndex ~= nil then
                 local faction = Faction(ship.factionIndex)
@@ -225,15 +223,15 @@ function onSectorEntered(playerIndex, x, y)
                 end
             end
         end
-        
+
         debugPrint(3, "Sector: "..x..":"..y.. " needed " ..(timer.microseconds/1000) .."ms for sorting out")
     end
-    
+
     debugPrint(2, "Player: "..Player().name.." entered sector with: "..(Sector().numPlayers-1).." more player(s)")
-    
+
     local timestamp = Sector():getValue("oosTimestamp")
-    
-    if timestamp ~= nil then 
+
+    if timestamp ~= nil then
         if Sector().numPlayers <= 1 then
             debugPrint(2, "timestamp aquired: " .. timestamp)
             calculateOOSProductionForStations(Sector(),timestamp)
@@ -256,7 +254,7 @@ function calculateOOSProductionForStations(sector,timestamp)
         t:start()
         countS = countS + 1
         if (station:hasScript("factory.lua")) then                      --normal factory
-            if (station:hasScript("turretfactory.lua")) then            --factory is a substring of turretfactory, but a turretfactory doesn't produce anything                
+            if (station:hasScript("turretfactory.lua")) then            --factory is a substring of turretfactory, but a turretfactory doesn't produce anything
             else
                 countF = countF + 1
                 calculateOOSProductionForFactory(station, timestamp)
@@ -293,7 +291,7 @@ function calculateOOSProductionForShipyard(shipyard,timestamp)
         debugPrint(3, "update shipyard +: "..timeDelta)
     else
         debugPrint(3, "Error updating shipyard: "..tostring(dat))
-        
+
     end
 end
 
@@ -313,10 +311,10 @@ function calculateOOSProductionForTradingPost(station, timestamp)
         debugPrint(3, "Not enough time has passed for tradingpost to update")
         return
     end
-    
+
     local cycles = timeDelta / 25       -- 50% Chance after 25 Seconds
     local boughtGoods = tradingdata.boughtGoods
-    
+
     if cycles < #boughtGoods then
         for i=1, cycles do
             local good = getRandomGood(boughtGoods)
@@ -357,19 +355,19 @@ function calculateOOSProductionForResourcetrader(station, timestamp)
     end
     --modifiers
     local resourceUpdateCycleTime = 3600            --once every hour
-    local cap = 100000                              --100,000 as a maximum stock of the resource 
+    local cap = 100000                              --100,000 as a maximum stock of the resource
     local variance = 0.1
     local neededUpdateCycles = timeDelta / resourceUpdateCycleTime
     local npcBuyProbability = 0.4                  -- resources will be depleted with this probabity and filled with 1-npcBuyProbability
     local base = 1000
     local probabilities = Balancing_GetMaterialProbability(Sector():getCoordinates());
-    
+
     for index, amount in ipairs(stock) do
         if probabilities[index-1]-0.1 > 0 then
             local bendCap = cap + (math.random()-0.5) * variance
             local totalAmount = neededUpdateCycles * (math.random(95, 106)/101) * base
             local npcBuying = (npcBuyProbability * ((2*stock[index]) / cap)) * totalAmount * (-1)
-            local npcSelling = (1-(npcBuyProbability * ((2*stock[index]) / cap))) * totalAmount 
+            local npcSelling = (1-(npcBuyProbability * ((2*stock[index]) / cap))) * totalAmount
             local changeAmount = (npcBuying + npcSelling) / index
             debugPrint(4, "old Stock", nil, Material(index-1).name, stock[index], bendCap, changeAmount, npcBuying, npcSelling)
             stock[index] = math.floor(math.min(math.max(bendCap, amount), math.abs(amount + changeAmount)))
@@ -403,12 +401,12 @@ function consumption(station, timestamp)
         return
     end
     local cyclesRequired = timeDelta / 60           -- consumer.lua consumes 5 every minute
-    
+
     if cyclesRequired < 1 then
         debugPrint(4,"not enough cycles to update", nil, cyclesRequired)
         return
     end
-    
+
     local boughtGoods = tradingdata.boughtGoods
     --print(timeDelta, cyclesRequired, "cycles "..#boughtGoods)
     if cyclesRequired < #boughtGoods then
@@ -458,16 +456,16 @@ function calculateOOSProductionForFactory(factory,timestamp)
         debugPrint(0, "There was a Jump back in time! Did the server crash previously?") --more likely : the Tickhandler restarted or could not load the Ticksfile
         return
     end
-    
+
     local status , factoryData = factory:invokeFunction("factory", "secure", nil)
     debugPrint(4, "Status of the underlaying Factoryrequest: " .. status)
     local maxDuration = 0
     local maxNumProductions = 0
     local factorySize = 0
     local production = {}
-    local currentProductions = {} 
+    local currentProductions = {}
     local tradingdata = {}
-    if status == 0 then 
+    if status == 0 then
         maxDuration = factoryData.maxDuration                 --Factory total cycle time
         maxNumProductions = factoryData.maxNumProductions     --max. number simultainious Productions
         factorySize = factoryData.maxNumProductions - 1       --self explained
@@ -490,7 +488,7 @@ function calculateOOSProductionForFactory(factory,timestamp)
     debugPrint(3, "Starting with: "..maximumProcesses)
     local spaceForExtraProcessesNeeded = 0     --since the currently running processes will be ended within the factory script, we need to make sure that they will still fit in.
     for i,timepassed in pairs(currentProductions) do
-        if(maxDuration - timepassed) <= timeDelta then 
+        if(maxDuration - timepassed) <= timeDelta then
             debugPrint(4, "Current Process at: "..timepassed)
             maximumProcesses = maximumProcesses - 1
             spaceForExtraProcessesNeeded = spaceForExtraProcessesNeeded + 1
@@ -513,7 +511,7 @@ function calculateOOSProductionForFactory(factory,timestamp)
                 debugPrint(3, ingredient.name..": "..getNumGoods(factory, ingredient.name).." | required: " .. ingredient.amount)
                 maximumProcesses = math.min(math.floor(getNumGoods(factory, ingredient.name) / ingredient.amount), maximumProcesses)
             end
-            if(ingredient.optional == 0 and getNumGoods(factory, ingredient.name) < ingredient.amount) then 
+            if(ingredient.optional == 0 and getNumGoods(factory, ingredient.name) < ingredient.amount) then
                 debugPrint(2, "Not enough resources for a single process: "..ingredient.name)
                 return
             end
@@ -545,12 +543,12 @@ function calculateOOSProductionForFactory(factory,timestamp)
         return
     end
     debugPrint(1, "The Factory is "..maximumProcesses.." processes behind.")
-    
+
     for _, ingredient in pairs(production.ingredients) do
         debugPrint(4, "remove "..ingredient.amount * maximumProcesses.." of " .. ingredient.name)
         decreaseGoods(factory, tradingdata, ingredient.name, ingredient.amount * maximumProcesses)
     end
-    
+
     for i, result in pairs(production.results) do
         debugPrint(4, "add "..result.amount * maximumProcesses.." of " .. result.name)
         increaseGoods(factory, tradingdata, result.name, result.amount * maximumProcesses)

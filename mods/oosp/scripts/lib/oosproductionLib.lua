@@ -16,12 +16,11 @@ function debugPrint(debuglvl, msg, tableToPrint, ...)
 end
 
 function getNumGoods(entity, name)
-    local self = entity
 
     local good = goods[name]:good() -- I have legitimately no idea why this works, but it works ;D
     if not good then return 0 end
 
-    return self:getCargoAmount(good)
+    return entity:getCargoAmount(good)
 end
 
 function getMaxGoods(entity, tradingGoodsData, name)
@@ -124,4 +123,3 @@ function extractTradingGoods(tradingGoodsData)
     end
     return boughtGoods , soldGoods
 end
-
