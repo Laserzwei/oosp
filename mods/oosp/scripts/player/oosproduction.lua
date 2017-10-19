@@ -264,10 +264,10 @@ function calculateOOSProductionForStations(sector,timestamp)
             consumption(station, timestamp)
         end
         if (station:hasScript("planetarytradingpost.lua")) then
-            calculateOOSProductionForTradingPost(station, timestamp)
+            calculateOOSProductionForTradingPost(station, timestamp, "scripts/entity/merchants/planetarytradingpost.lua")
         end
         if (station:hasScript("tradingpost.lua")) then
-            calculateOOSProductionForTradingPost(station, timestamp)
+            calculateOOSProductionForTradingPost(station, timestamp, "scripts/entity/merchants/tradingpost.lua")
         end
         if (station:hasScript("resourcetrader.lua")) then
             calculateOOSProductionForResourcetrader(station, timestamp)
@@ -298,8 +298,8 @@ function calculateOOSProductionForShipyard(shipyard,timestamp)
     end
 end
 
-function calculateOOSProductionForTradingPost(station, timestamp)
-    local status, tradingdata = station:invokeFunction("scripts/entity/merchants/tradingpost.lua", "secure")
+function calculateOOSProductionForTradingPost(station, timestamp, script)
+    local status, tradingdata = station:invokeFunction(script, "secure")
     if status ~= 0 then
         debugPrint(4, "Could not update tradingpost ", nil, station.name, status)
         return
@@ -323,7 +323,7 @@ function calculateOOSProductionForTradingPost(station, timestamp)
             local good = getRandomGood(boughtGoods)
             local amount = math.floor(math.random(1, 6)+0.5)
             if good ~= nil and amount > 0 then
-                local status = station:invokeFunction("scripts/entity/merchants/tradingpost.lua", "decreaseGoods", good.name, amount)
+                local status = station:invokeFunction(script, "decreaseGoods", good.name, amount)
                 debugPrint(4, "tradingpost good change (S)", nil, station.name, good.name, -amount)
                 if status ~=0 then debugPrint(4, "Could not update tradingpost writeback ", nil, station.name, good.name, amount) end
             end
@@ -333,7 +333,7 @@ function calculateOOSProductionForTradingPost(station, timestamp)
     for _,good in pairs(boughtGoods) do
         local amount = (math.random()*2+4) * cycles / (math.max(math.min(2, good.size), 0.25) * #boughtGoods)
         if good ~= nil and amount > 0 then
-            local status = station:invokeFunction("scripts/entity/merchants/tradingpost.lua", "decreaseGoods", good.name, amount)
+            local status = station:invokeFunction(script, "decreaseGoods", good.name, amount)
             debugPrint(4, "tradingpost good change", nil, station.name, good.name, -amount)
             if status ~=0 then debugPrint(4, "Could not update tradingpost writeback ", nil, station.name, good.name, amount) end
         end
