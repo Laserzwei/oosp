@@ -263,6 +263,9 @@ function calculateOOSProductionForStations(sector,timestamp)
         if (station:hasScript("consumer.lua")) then --biotope, casino, equip.dock, habitat, militaryoutpost, repairdock, researchstation, resistance outpost, scrapyard, shipyard-trading
             consumption(station, timestamp)
         end
+        if (station:hasScript("planetarytradingpost.lua")) then
+            calculateOOSProductionForTradingPost(station, timestamp)
+        end
         if (station:hasScript("tradingpost.lua")) then
             calculateOOSProductionForTradingPost(station, timestamp)
         end

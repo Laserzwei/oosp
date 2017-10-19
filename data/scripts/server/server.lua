@@ -1,6 +1,5 @@
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/server/?.lua"
-package.path = package.path .. ";mods/?"                                        --oosp
 require ("factions")
 require ("stringutility")
 
@@ -54,7 +53,7 @@ function onPlayerLogIn(playerIndex)
     player:addScriptOnce("story/spawnai.lua")
     player:addScriptOnce("story/spawnguardian.lua")
     player:addScriptOnce("story/spawnadventurer.lua")
-    player:addScriptOnce("player/oosproduction.lua")                            --oosp
+    player:addScriptOnce("mods/oosp/scripts/player/oosproduction.lua")                            --oosp
     matchResources(player)
 end
 
