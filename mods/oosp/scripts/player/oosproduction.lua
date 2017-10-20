@@ -1,27 +1,29 @@
 package.path = package.path .. ";data/scripts/lib/?.lua"
-package.path = package.path .. ";mods/oosp/scripts/lib/oosproductionLib.lua"
+package.path = package.path .. ";mods/oosp/scripts/lib/?.lua"
+package.path = package.path .. ";mods/oosp/config/?.lua"
 require ("oosproductionLib")
 require ("utility")
 require ("goods")
 require ("productions")
 require ("galaxy")
+local oospConfig = require ("config")
+oospConfig.ignoreVersioncheck = true                    --change as required
 
-IGNOREVESIONCHECK = true                    --change as required
-INCLUDEPLAYERS = false
-DEBUGLEVEL = 2
-
-                                            -- do not change below
 MOD = "[OOSP]"
-VERSION = "[0.9_91] "
+VERSION = "[0.9_92] "
 local timeString = "online_time"
+--sanitizing player input
+oospConfig.consumptionTime = math.max(oospConfig.consumptionTime, 1)
+oospConfig.consumptionTimeVariation = math.max(math.min(oospConfig.consumptionTimeVariation, 0.9), 0.0)
+oospConfig.generationTime = math.max(oospConfig.generationTime, 1)
+oospConfig.generationTimeVariaton = math.max(math.min(oospConfig.generationTimeVariaton, 0.9), 0.0)
 
-Placer = require("placer")
 local usesRightVersion = false
 local derefferedTimeout = 20                    -- in seconds
 local hasBeenChecked = false
 
 function debugPrint(debuglvl, msg, tableToPrint, ...)
-    if debuglvl <= DEBUGLEVEL then
+    if debuglvl <= oospConfig.debugLevel then
         print(MOD..VERSION..msg, ...)
         if type(tableToPrint) == "table" then
             printTable(tableToPrint)
@@ -40,12 +42,12 @@ function initialize()
         debugPrint(3,"Event cleanup: "..tostring(unregisterOnSectorLeftValue).." | "..tostring(unregisterOnSectorEnteredValue).." | "..tostring(unregisterOnPlayerLogOffValue).." Expected: 0|0|0")
 
         playerIndex = Faction().index
-        if playerIndex ~= nil and IGNOREVESIONCHECK == false then
+        if playerIndex ~= nil and oospConfig.ignoreVersioncheck == false then
             Player(): sendChatMessage("Sever", 2, "Waiting to receive version. Try not to Jump. This takes about 20 seconds!")
             deferredCallback(derefferedTimeout, "dCheck", playerIndex)
         end
 
-        if playerIndex ~= nil and IGNOREVESIONCHECK == true then
+        if playerIndex ~= nil and config.ignoreVersioncheck == true then
             usesRightVersion = true
             registerPlayer(playerIndex)
         end
@@ -198,7 +200,7 @@ function onSectorEntered(playerIndex, x, y)
     sector = Sector()
     local stations = {sector:getEntitiesByType(EntityType.Station)}
     local ships = {sector:getEntitiesByType(EntityType.Ship)}
-    if INCLUDEPLAYERS == false then
+    if oospConfig.includePlayerProperty == false then
         for _,station in pairs(stations) do
             if station ~= nil and station.factionIndex ~= nil then
                 if Faction(station.factionIndex).isPlayer then
@@ -253,26 +255,26 @@ function calculateOOSProductionForStations(sector,timestamp)
         local t = Timer()
         t:start()
         countS = countS + 1
-        if (station:hasScript("factory.lua")) then                      --normal factory
+        if (oospConfig.includeFactories and station:hasScript("factory.lua")) then                      --normal factory
             if (station:hasScript("turretfactory.lua")) then            --factory is a substring of turretfactory, but a turretfactory doesn't produce anything
             else
                 countF = countF + 1
                 calculateOOSProductionForFactory(station, timestamp)
             end
         end
-        if (station:hasScript("consumer.lua")) then --biotope, casino, equip.dock, habitat, militaryoutpost, repairdock, researchstation, resistance outpost, scrapyard, shipyard-trading
+        if (oospConfig.includeConsumers and station:hasScript("consumer.lua")) then --biotope, casino, equip.dock, habitat, militaryoutpost, repairdock, researchstation, resistance outpost, scrapyard, shipyard-trading
             consumption(station, timestamp)
         end
-        if (station:hasScript("planetarytradingpost.lua")) then
+        if (oospConfig.includeTradingPosts and station:hasScript("planetarytradingpost.lua")) then
             calculateOOSProductionForTradingPost(station, timestamp, "scripts/entity/merchants/planetarytradingpost.lua")
         end
-        if (station:hasScript("tradingpost.lua")) then
+        if (oospConfig.includeTradingPosts and station:hasScript("tradingpost.lua")) then
             calculateOOSProductionForTradingPost(station, timestamp, "scripts/entity/merchants/tradingpost.lua")
         end
-        if (station:hasScript("resourcetrader.lua")) then
+        if (oospConfig.includeResourceDepots and station:hasScript("resourcetrader.lua")) then
             calculateOOSProductionForResourcetrader(station, timestamp)
         end
-        if (station:hasScript("shipyard.lua")) then                      --shipyard-ships
+        if (oospConfig.includeShipyards and station:hasScript("shipyard.lua")) then                      --shipyard-ships
             debugPrint(3, "update shipyard: "..station.name)
             calculateOOSProductionForShipyard(station,timestamp)
         end
@@ -309,35 +311,32 @@ function calculateOOSProductionForTradingPost(station, timestamp, script)
         debugPrint(0, "galaxyticks not found!")
         return
     end
-    local timeDelta = currentTime - timestamp
-    if timeDelta < 50 then
-        debugPrint(3, "Not enough time has passed for tradingpost to update")
-        return
-    end
 
-    local cycles = timeDelta / 25       -- 50% Chance after 25 Seconds
+    local timeDelta = currentTime - timestamp
     local boughtGoods = tradingdata.boughtGoods
 
-    if cycles < #boughtGoods then
-        for i=1, cycles do
-            local good = getRandomGood(boughtGoods)
-            local amount = math.floor(math.random(1, 6)+0.5)
-            if good ~= nil and amount > 0 then
-                local status = station:invokeFunction(script, "decreaseGoods", good.name, amount)
-                debugPrint(4, "tradingpost good change (S)", nil, station.name, good.name, -amount)
-                if status ~=0 then debugPrint(4, "Could not update tradingpost writeback ", nil, station.name, good.name, amount) end
-            end
-        end
-        return
-    end
     for _,good in pairs(boughtGoods) do
-        local amount = (math.random()*2+4) * cycles / (math.max(math.min(2, good.size), 0.25) * #boughtGoods)
-        if good ~= nil and amount > 0 then
+        local status, currentStock, maxStock = station:invokeFunction(script, "getStock", good.name)
+        local percentageToTake = (timeDelta / oospConfig.consumptionTime) * (1 + (math.random() * 2 * oospConfig.consumptionTimeVariation) - oospConfig.consumptionTimeVariation)
+        local amount = maxStock * percentageToTake
+        debugPrint(4, "removing", nil, amount, good.name, "from", station.name, maxStock, percentageToTake, currentStock)
+        if amount > 5 then
             local status = station:invokeFunction(script, "decreaseGoods", good.name, amount)
-            debugPrint(4, "tradingpost good change", nil, station.name, good.name, -amount)
-            if status ~=0 then debugPrint(4, "Could not update tradingpost writeback ", nil, station.name, good.name, amount) end
         end
     end
+
+    local soldGoods = tradingdata.soldGoods
+    for _,good in pairs(soldGoods) do
+        local status, currentStock, maxStock = station:invokeFunction(script, "getStock", good.name)
+        local percentageToAdd = (timeDelta / oospConfig.consumptionTime) * (1 + (math.random() * 2 * oospConfig.consumptionTimeVariation) - oospConfig.consumptionTimeVariation)
+        local amount = maxStock * percentageToAdd
+        debugPrint(4, "adding", nil, amount, good.name, "to", station.name, maxStock, percentageToAdd, currentStock)
+        if amount > 5 then
+            local status = station:invokeFunction(script, "increaseGoods", good.name, amount)
+        end
+    end
+
+
 end
 
 function calculateOOSProductionForResourcetrader(station, timestamp)
@@ -398,55 +397,21 @@ function consumption(station, timestamp)
         debugPrint(0, "galaxyticks not found!")
         return
     end
+
     local timeDelta = currentTime - timestamp
-    if timeDelta < 1 then
-        debugPrint(0, "There was a Jump back in time! Did the server crash previously?") --more likely : the Tickhandler restarted or could not load the Ticksfile
-        return
-    end
-    local cyclesRequired = timeDelta / 60           -- consumer.lua consumes 5 every minute
-
-    if cyclesRequired < 1 then
-        debugPrint(4,"not enough cycles to update", nil, cyclesRequired)
-        return
-    end
-
     local boughtGoods = tradingdata.boughtGoods
-    --print(timeDelta, cyclesRequired, "cycles "..#boughtGoods)
-    if cyclesRequired < #boughtGoods then
-        for i=1, cyclesRequired do
-            local good = getRandomGood(boughtGoods)
-            local amount = math.floor(math.random(1, 5)+0.5)
-            if good ~= nil and amount > 0 then
-                local status = station:invokeFunction("scripts/entity/merchants/consumer.lua", "decreaseGoods", good.name, amount)
-                debugPrint(4, "consumer good change (S)", nil, station.name, good.name, amount)
-                if status ~=0 then debugPrint(4, "Could not update consumer writeback ", nil, station.name, good.name, -amount) end
-            end
-        end
-        return
-    end
+
     for _,good in pairs(boughtGoods) do
-        local amount = (math.random()*2+4) * cyclesRequired / (math.max(math.min(2, good.size), 0.25) * #boughtGoods)
-        if good ~= nil and amount > 0 then
-            local status = station:invokeFunction("scripts/entity/merchants/consumer.lua", "decreaseGoods", good.name, amount)
-            debugPrint(4, "consumer good change", nil, station.name, good.name, amount)
-            if status ~=0 then debugPrint(4, "Could not update consumer writeback ", nil, station.name, good.name, amount) end
+        local status, currentStock, maxStock = station:invokeFunction(script, "getStock", good.name)
+        local percentageToTake = (timeDelta / oospConfig.consumptionTime) * (1 + (math.random() * 2 * oospConfig.consumptionTimeVariation) - oospConfig.consumptionTimeVariation)
+        local amount = math.floor(maxStock * percentageToTake)
+        debugPrint(4, "removing", nil, amount, good.name, "from", station.name, maxStock, percentageToTake, currentStock)
+        if amount > 5 then
+            local status = station:invokeFunction(script, "decreaseGoods", good.name, amount)
         end
     end
 end
 
-function getRandomGood(goods)
-	local length = tablelength(goods)
-	local selectG = getInt(1,length)
-	local count = 1
-	for _,good in pairs(goods) do
-		if count == selectG then
-			selectG = good
-			break
-		end
-        count = count + 1
-	end
-	return selectG
-end
 --calculate the production in absence
 function calculateOOSProductionForFactory(factory,timestamp)
     local currentTime = Server():getValue(timeString)

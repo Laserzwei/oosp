@@ -4,17 +4,6 @@ This Helper Funktion is required because in oosproduction.lua there is no Entity
 package.path = package.path .. ";data/scripts/lib/?.lua"
 require ("goods")
 
-local DEBUGLEVEL = 2
-
-function debugPrint(debuglvl, msg, tableToPrint, ...)
-    if debuglvl <= DEBUGLEVEL then
-        print(MOD..VERSION..msg, ...)
-        if type(tableToPrint) == "table" then
-            printTable(tableToPrint)
-        end
-    end
-end
-
 function getNumGoods(entity, name)
 
     local good = goods[name]:good() -- I have legitimately no idea why this works, but it works ;D
