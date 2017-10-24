@@ -402,12 +402,12 @@ function consumption(station, timestamp)
     local boughtGoods = tradingdata.boughtGoods
 
     for _,good in pairs(boughtGoods) do
-        local status, currentStock, maxStock = station:invokeFunction(script, "getStock", good.name)
+        local status, currentStock, maxStock = station:invokeFunction("scripts/entity/merchants/consumer.lua", "getStock", good.name)
         local percentageToTake = (timeDelta / oospConfig.consumptionTime) * (1 + (math.random() * 2 * oospConfig.consumptionTimeVariation) - oospConfig.consumptionTimeVariation)
         local amount = math.floor(maxStock * percentageToTake)
         debugPrint(4, "removing", nil, amount, good.name, "from", station.name, maxStock, percentageToTake, currentStock)
         if amount > 5 then
-            local status = station:invokeFunction(script, "decreaseGoods", good.name, amount)
+            local status = station:invokeFunction("scripts/entity/merchants/consumer.lua", "decreaseGoods", good.name, amount)
         end
     end
 end
