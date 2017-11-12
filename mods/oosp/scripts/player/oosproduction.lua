@@ -448,21 +448,36 @@ function calculateOOSProductionForFactory(factory,timestamp)
         debugPrint(0, factory.name..": Could not receive factory Data")
         return
     end
-    if(maxDuration == 0) then
-        debugPrint(0, factory.name.."has a cycletime of 0. This is odd!")
+
+    local value = 0
+    for _, result in pairs(production.results) do
+        local good = goods[result.name]
+        if good then
+            value = value + good.price * result.amount * math.max(1, good.level)
+        end
     end
-    local maximumProcesses = (timeDelta / (maxDuration)) * maxNumProductions -- theoretical maximum we can produce ine the Timeframe. Might be corrected down later on.
+
+    if production.garbages then
+        for i, garbage in pairs(production.garbages) do
+            local good = goods[garbage.name]
+            if good then
+                value = value + good.price * garbage.amount
+            end
+        end
+    end
+    local productionCapacity = math.max(100, factory:getPlan():getStats().productionCapacity)
+    local timeToProduce = math.max(15.0, value / productionCapacity)
+
+    local maximumProcesses = (timeDelta / (timeToProduce)) * maxNumProductions -- theoretical maximum we can produce ine the Timeframe. Might be corrected down later on.
+    print("time", timeToProduce, maximumProcesses)
     debugPrint(3, "timeDelta: "..timeDelta)
     debugPrint(3, "Starting with: "..maximumProcesses)
     local spaceForExtraProcessesNeeded = 0     --since the currently running processes will be ended within the factory script, we need to make sure that they will still fit in.
     for i,timepassed in pairs(currentProductions) do
-        if(maxDuration - timepassed) <= timeDelta then
+        if(timeToProduce - timepassed) <= timeDelta then
             debugPrint(4, "Current Process at: "..timepassed)
             maximumProcesses = maximumProcesses - 1
             spaceForExtraProcessesNeeded = spaceForExtraProcessesNeeded + 1
-            currentProductions[i] = maxDuration
-        else
-        -- we don't bother about this special case
         end
     end
     debugPrint(3, "Current production reduces to: "..maximumProcesses)
