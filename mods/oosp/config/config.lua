@@ -1,6 +1,6 @@
 config = {}
 
-config.includePlayerProperty = true            -- When false oosp will not update sectors with playerproperty in it, since the vanilla game can handle that. Defult false.
+config.includePlayerProperty = false            -- When false oosp will not update sectors with playerproperty in it, since the vanilla game can handle that. Defult false.
 config.ignoreVersioncheck = true                -- Allows to check, if a
 config.debugLevel = 2
 --These affect Tradingposts and consumers
