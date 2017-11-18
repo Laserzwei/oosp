@@ -1,13 +1,12 @@
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";mods/oosp/scripts/lib/?.lua"
-package.path = package.path .. ";mods/oosp/config/?.lua"
+
 require ("oosproductionLib")
 require ("utility")
 require ("goods")
 require ("productions")
 require ("galaxy")
-local oospConfig = require ("config")
-oospConfig.ignoreVersioncheck = true                    --change as required
+local oospConfig = require ("mods/oosp/config/oosp")
 
 MOD = "[OOSP]"
 VERSION = "[0.9_92] "
@@ -469,7 +468,6 @@ function calculateOOSProductionForFactory(factory,timestamp)
     local timeToProduce = math.max(15.0, value / productionCapacity)
 
     local maximumProcesses = (timeDelta / (timeToProduce)) * maxNumProductions -- theoretical maximum we can produce ine the Timeframe. Might be corrected down later on.
-    print("time", timeToProduce, maximumProcesses)
     debugPrint(3, "timeDelta: "..timeDelta)
     debugPrint(3, "Starting with: "..maximumProcesses)
     local spaceForExtraProcessesNeeded = 0     --since the currently running processes will be ended within the factory script, we need to make sure that they will still fit in.

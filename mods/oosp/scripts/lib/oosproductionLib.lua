@@ -1,6 +1,3 @@
---[[
-This Helper Funktion is required because in oosproduction.lua there is no Entity Context. Therfore the tradingmanager.lua does not provide useful results.
-]]
 package.path = package.path .. ";data/scripts/lib/?.lua"
 require ("goods")
 
