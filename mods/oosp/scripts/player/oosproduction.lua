@@ -251,6 +251,7 @@ function calculateOOSProductionForStations(sector,timestamp)
     local stations = {sector:getEntitiesByType(EntityType.Station)}
     local countS, countF = 0, 0
     for _, station in pairs(stations) do
+        print(station.name)
         local t = Timer()
         t:start()
         countS = countS + 1
@@ -349,39 +350,20 @@ function calculateOOSProductionForResourcetrader(station, timestamp)
         debugPrint(0, "galaxyticks not found!")
         return
     end
+    
     local timeDelta = currentTime - timestamp
-    if timeDelta < 60 then
-        debugPrint(3, "Not enough time has passed for resourcetrader")
-        return
-    end
-    --modifiers
-    local resourceUpdateCycleTime = 3600            --once every hour
-    local cap = 100000                              --100,000 as a maximum stock of the resource
-    local variance = 0.1
-    local neededUpdateCycles = timeDelta / resourceUpdateCycleTime
-    local npcBuyProbability = 0.4                  -- resources will be depleted with this probabity and filled with 1-npcBuyProbability
-    local base = 1000
     local probabilities = Balancing_GetMaterialProbability(Sector():getCoordinates());
-
     for index, amount in ipairs(stock) do
-        if probabilities[index-1]-0.1 > 0 then
-            local bendCap = cap + (math.random()-0.5) * variance
-            local totalAmount = neededUpdateCycles * (math.random(95, 106)/101) * base
-            local npcBuying = (npcBuyProbability * ((2*stock[index]) / cap)) * totalAmount * (-1)
-            local npcSelling = (1-(npcBuyProbability * ((2*stock[index]) / cap))) * totalAmount
-            local changeAmount = (npcBuying + npcSelling) / index
-            debugPrint(4, "old Stock", nil, Material(index-1).name, stock[index], bendCap, changeAmount, npcBuying, npcSelling)
-            stock[index] = math.floor(math.min(math.max(bendCap, amount), math.abs(amount + changeAmount)))
-            debugPrint(4, "new Stock", nil, Material(index-1).name, stock[index], bendCap)
+        if probabilities[index-1]-0.1 > 0 and index <= 7 then
+            local variance = 1 + (math.random() * 2 * oospConfig.ResourceVariation) - oospConfig.ResourceVariation
+            local stockChange = timeDelta/oospConfig.ResourcefillTime * oospConfig.ResourcefillTime * variance
+            local newStock = math.min(math.floor(oospConfig.ResourceMax*variance), math.floor(amount + stockChange))
+            newStock = math.max(0,newStock)
+            station:invokeFunction("scripts/entity/merchants/resourcetrader.lua", "setData", index, newStock)
+            debugPrint(3,"Resource depotupdate", nil, "Res:", Material(index-1).name, "before:", amount, "after:", newStock)
         else
             break
         end
-    end
-    debugPrint(4, "resources", stock)
-    local status = station:invokeFunction("scripts/entity/merchants/resourcetrader.lua", "restore", stock)
-    if status ~= 0 then
-        debugPrint(4, "Could not update resourcetrader List ", nil, station.name, status)
-        return
     end
 end
 
