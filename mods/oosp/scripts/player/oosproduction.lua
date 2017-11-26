@@ -251,7 +251,6 @@ function calculateOOSProductionForStations(sector,timestamp)
     local stations = {sector:getEntitiesByType(EntityType.Station)}
     local countS, countF = 0, 0
     for _, station in pairs(stations) do
-        print(station.name)
         local t = Timer()
         t:start()
         countS = countS + 1
