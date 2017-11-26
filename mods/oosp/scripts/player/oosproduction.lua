@@ -202,7 +202,7 @@ function onSectorEntered(playerIndex, x, y)
     if oospConfig.includePlayerProperty == false then
         for _,station in pairs(stations) do
             if station ~= nil and station.factionIndex ~= nil then
-                if station.factionIndex and Faction(station.factionIndex).isPlayer then
+                if Faction(station.factionIndex) and Faction(station.factionIndex).isPlayer then
                     debugPrint(3,"no OOSP update for Playersectors", nil, "Sector "..sector.name.." ("..x..":"..y..")Station: ", station.name, Player(station.factionIndex).name)
                     return
                 end
@@ -350,7 +350,7 @@ function calculateOOSProductionForResourcetrader(station, timestamp)
         debugPrint(0, "galaxyticks not found!")
         return
     end
-    
+
     local timeDelta = currentTime - timestamp
     local probabilities = Balancing_GetMaterialProbability(Sector():getCoordinates());
     for index, amount in ipairs(stock) do
