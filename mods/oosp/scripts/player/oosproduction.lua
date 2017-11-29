@@ -9,7 +9,7 @@ require ("galaxy")
 local oospConfig = require ("mods/oosp/config/oosp")
 
 MOD = "[OOSP]"
-VERSION = "[0.9_92b] "
+VERSION = "[0.9_92d] "
 local timeString = "online_time"
 --sanitizing player input
 oospConfig.consumptionTime = math.max(oospConfig.consumptionTime, 1)
