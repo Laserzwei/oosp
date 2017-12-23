@@ -15,7 +15,7 @@ local timeString = "online_time"
 oospConfig.consumptionTime = math.max(oospConfig.consumptionTime, 1)
 oospConfig.consumptionTimeVariation = math.max(math.min(oospConfig.consumptionTimeVariation, 0.9), 0.0)
 oospConfig.generationTime = math.max(oospConfig.generationTime, 1)
-oospConfig.generationTimeVariaton = math.max(math.min(oospConfig.generationTimeVariaton, 0.9), 0.0)
+oospConfig.generationTimeVariation = math.max(math.min(oospConfig.generationTimeVariation, 0.9), 0.0)
 
 local usesRightVersion = false
 local derefferedTimeout = 20                    -- in seconds
@@ -327,7 +327,7 @@ function calculateOOSProductionForTradingPost(station, timestamp, script)
     local soldGoods = tradingdata.soldGoods
     for _,good in pairs(soldGoods) do
         local status, currentStock, maxStock = station:invokeFunction(script, "getStock", good.name)
-        local percentageToAdd = (timeDelta / oospConfig.consumptionTime) * (1 + (math.random() * 2 * oospConfig.consumptionTimeVariation) - oospConfig.consumptionTimeVariation)
+        local percentageToAdd = (timeDelta / oospConfig.generationTime) * (1 + (math.random() * 2 * oospConfig.generationTimeVariation) - oospConfig.generationTimeVariation)
         local amount = maxStock * percentageToAdd
         debugPrint(4, "adding", nil, amount, good.name, "to", station.name, maxStock, percentageToAdd, currentStock)
         if amount > 5 then
