@@ -1,0 +1,103 @@
+[color=limegreen]--0.99_5for 0.15.8[/color]
+ - removed oosp not installed detection
+ - removed oosp for all consumers
+ - reworked code for resourcetraders update
+ - removed playerscript handling the (Un-)Loading event
+ - removed the timesystem for accurate out-of-sector calculations
+ - removed oosProdLib since it's not required anymore
+ - remove shipyard oosp update; now [url=http://www.avorion.net/forum/index.php/topic,3910.0.html]here[/url]
+[color=limegreen]--0.99_2d for 0.15.7[/color]
+ - fixed incompatibility with MineCorp (for real!)
+--0.99_2c for 0.15
+  - fixed issue with resource depots
+  - fixed incompatibility with MineCorp
+  - 3 new config options for resource traders
+--0.99_2b for 0.15
+  - properly added the config, thanks Dirtyredz
+--0.99_2 for 0.15
+  - update to 0.15
+  - uses the production time calculation based on assembly blocks for factories
+  - extended config
+  - moved to /mods/ folder
+--0.9_91 for beta .8782
+[Changes]
+  - [color=red]removed unneccessary Event-unregister, which could cause crashes.[/color]
+--0.9_9
+[Changes]
+  -[color=green] Changed consumption to better reflect economy[/color]
+--0.9_8p for beta .8782
+[Changes]
+  -[color=green]Playersectors can be included again:[/color] "INCLUDEPLAYERS = true" in /player/oosproduction.lua
+  -[color=orange]Problem with not existing Factions has been resolved. [/color]
+--0.9_8 for beta .8782
+[Changes]
+  -[color=yellow]The mod does not affect Sectors with Player-property anymore[/color] (This excludes the current Playership).
+  -[color=green]All NPC (Trading-)Stations are now fully supported.[/color]
+  -[color=green]ResourceDepots now slowly regenerate resources to buy.[/color]
+  -[color=white][inetrnal][/color]changed from a tickbased to a timebased systems
+  -[color=white]The Versioncheck is now off by default[/color]
+--0.9_7c for beta .7633
+[Changes]
+ -Added "IGNOREVESIONCHECK"-variable to ignore the version check some players have problems with. To deactivate the Version check set it to "true".
+ -[color=orange]Answers to a version check that exceeded the threshold-time won't be dropped anymore.[/color]
+--0.9_7b for beta .7633
+[Changes]
+[color=green]Clarified some notions with the Version detection[/color]
+--0.9_7 for beta .7633
+[Changes]
+[color=green] divided moveAsteroids into its own mod[/color]
+[color=orange]make sure you also install the standalone Version of MoveAsteroids or else you might suffer the loss of claimed asteroids: [/color]
+[url=http://www.avorion.net/forum/index.php/topic,2685.0.html]http://www.avorion.net/forum/index.php/topic,2685.0.html[/url]
+
+--0.9_6c for beta .7633
+[Changes]
+[color=green] reduced logs when factories get updated [/color]
+[color=green] now also players that don't have OOSP installed get a warning that they need to install/update.[/color]
+[Bugfixes]
+[color=green] When a Turretfactory was present in a sector, some factories might not have been updated [/color]
+
+--0.9_6b   .7509 beta only
+Please note: Don't do a downgrade from 0.9_6b to e.g. 0.9_5
+[Changes]
+ [color=green]getTick/setTick <amount>  added.[/color][color=yellow]Admins make sure normal users can't acces setTick![/color]
+ [color=green]I you join a server running 0.9_6 or higher,but have an outdated version. The game will tell you![/color]
+[Bugfixes]
+[list]
+[li][Bug] [color=green]if for some reason (server crashing etc.) no full server save was executed, it is likely that the galaxytick.txt file was never created and therefore the calculation couldn't be done properly which might feel like the mod is not working.[/color][/li]
+
+[li][Bug][color=green] when multiple players are online and one leaves, the logoff handling would be triggered for everyone of them.[/color][/li]
+[/list]
+
+--0.9_5.
+[Bugfixes]
+ [Bug] [color=orange]if for some reason (server crashing etc.) no full server save was executed, it is likely that the galaxytick.txt file was never created and therefore the calculation couldn't be done properly which might feel like the mod is not working.[/color]
+if you see the following on every serverstart in your serverlog:
+
+[code]
+Wed Feb 08 00:40:38 2017| [OOSP] This is not critical on first start:
+Wed Feb 08 00:40:38 2017|  Loading galaxyticks failed: data/scripts/server/tickhandler.lua:34: cannot open file 'galaxyticks.txt' (No such file or directory)[/code]
+
+[list]
+[li]Chances are very high you suffer from this problem.
+Only if you show these symptoms place this in data/scripts/server:
+[s]https://www.dropbox.com/s/pmzol06p4b1n291/tickhandler.lua?dl=1[/s][/li]
+[li][color=green]a bug where the ticks weren't saved on the server[/color][/li]
+[li][color=green]a bug where removing/taking ressources within in the update process crashed and stopped working for that exact Player[/color] (not serverwide)[/li]
+[li][color=green] resolved incompatibility with shipyard.lua[/color][/li]
+[li][color=green]jumping with multiple Asteroids at the same time caused a servercrash[/color].- This one was hard to fix.[/li]
+[/list]
+
+--0.9_2 incompatible to v.0.10.2.7448 and higher
+[Addition]
+  [color=green]added Move Asteroids command to claimed, but neither sold or to-Mine-transformed Asteroids[/color]
+--0.9_1 incompatible to v.0.10.2.7448 and higher
+[Addition]
+  [color=green]added support for Shipyards[/color]
+  [color=green]Consolemessages now have [OOSP] as prefix[/color]
+[Bugfixes]
+  [color=green]removed a potential exploit for gaining bonusticks when multiple players enter a loaded sector.[/color]
+--0.9b
+[Bugfixes]
+  [color=green]fixed a missing dependency which stopped the mod for some palyers[/color]
+--0.9
+[color=green]release[/color]
