@@ -44,25 +44,25 @@
 --0.9_8p for beta .8782
 
   [Changes]
-  -Playersectors can be included again: "INCLUDEPLAYERS = true" in /player/oosproduction.lua
-  -Problem with not existing Factions has been resolved.
+  - Playersectors can be included again: "INCLUDEPLAYERS = true" in /player/oosproduction.lua
+  - Problem with not existing Factions has been resolved.
 
 
 --0.9_8 for beta .8782
 
   [Changes]
-  -The mod does not affect Sectors with Player-property anymore (This excludes the current Playership).
-  -All NPC (Trading-)Stations are now fully supported.
-  -ResourceDepots now slowly regenerate resources to buy.
-  -[inetrnal]changed from a tickbased to a timebased systems
-  -The Versioncheck is now off by default
+  - The mod does not affect Sectors with Player-property anymore (This excludes the current Playership).
+  - All NPC (Trading-)Stations are now fully supported.
+  - ResourceDepots now slowly regenerate resources to buy.
+  - [inetrnal]changed from a tickbased to a timebased systems
+  - The Versioncheck is now off by default
 
 
 --0.9_7c for beta .7633
 
   [Changes]
- -Added "IGNOREVESIONCHECK"-variable to ignore the version check some players have problems with. To deactivate the Version check set it to "true".
- -Answers to a version check that exceeded the threshold-time won't be dropped anymore.
+ - Added "IGNOREVESIONCHECK"-variable to ignore the version check some players have problems with. To deactivate the Version check set it to "true".
+ - Answers to a version check that exceeded the threshold-time won't be dropped anymore.
 
 
 --0.9_7b for beta .7633
@@ -123,22 +123,27 @@ Only if you show these symptoms place this in data/scripts/server: https://www.d
 
 
 --0.9_2 incompatible to v.0.10.2.7448 and higher
+
   [Addition]
-  added Move Asteroids command to claimed, but neither sold or to-Mine-transformed Asteroids
+ - added Move Asteroids command to claimed, but neither sold or to-Mine-transformed Asteroids
 
 
 --0.9_1 incompatible to v.0.10.2.7448 and higher
+
   [Addition]
-  added support for Shipyards
-  Consolemessages now have [OOSP] as prefix
+ - added support for Shipyards
+ - Consolemessages now have [OOSP] as prefix
+
   [Bugfixes]
-  removed a potential exploit for gaining bonusticks when multiple players enter a loaded sector.
+ - removed a potential exploit for gaining bonusticks when multiple players enter a loaded sector.
 
 
 --0.9b
+
   [Bugfixes]
-  fixed a missing dependency which stopped the mod for some palyers
+ - fixed a missing dependency which stopped the mod for some palyers
 
 
 --0.9
+
 release
