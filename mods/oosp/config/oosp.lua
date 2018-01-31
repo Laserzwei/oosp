@@ -2,7 +2,7 @@ package.path = package.path .. ";data/scripts/lib/?.lua"
 require ("utility")
 config = {}
 config.MOD = "OOSP"
-config.VERSION = "[0.9_95] "
+config.VERSION = "[0.99_5] "
 config.debugLevel = 0
 
 --This affects resource depots
