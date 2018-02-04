@@ -1,3 +1,7 @@
+--0.99_5b for 0.15.8
+  - now actually changing the stock (>.<)
+
+
 --0.99_5 for 0.15.8
  - removed oosp not installed detection
  - removed oosp for all consumers
