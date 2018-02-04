@@ -1,4 +1,4 @@
---0.99_5for 0.15.8
+--0.99_5 for 0.15.8
  - removed oosp not installed detection
  - removed oosp for all consumers
  - reworked code for resourcetraders update
