@@ -142,15 +142,16 @@ function ResourceDepot.onRestoredFromDisk(timeSinceLastSimulation)
     local factor = timeSinceLastSimulation * config.ResourceMaxFactor / config.ResourcefillTime
     local startStock = getStartingResources()
     math.min(factor, config.ResourceMaxFactor)
-    local testStock = {}
     for i = 1, NumMaterials() do
         local variance = getFloat(1-config.ResourceVariation, 1+config.ResourceVariation)
         local additionalStock = round(startStock[i]*factor*variance)
-        testStock[i] = stock[i] + additionalStock
-        config.debugPrint(3, Entity().name.." testStock", startStock[i],additionalStock, variance, factor)
+        stock[i] = stock[i] + additionalStock
+        config.debugPrint(3, Entity().name.." stock", startStock[i],additionalStock, variance, factor)
     end
-
-    --send to client
+    --synch change to clients
+    for i = 1, NumMaterials() do
+        broadcastInvokeClientFunction("setData", i, stock[i])
+    end
 end
 
 -- create all required UI elements for the client side
