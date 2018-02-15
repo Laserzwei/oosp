@@ -1,3 +1,6 @@
+## Avorion 0.16.1 added the resource restock functionality into the vanilla game. Therefore all OOSP features are now in vanilla Avorion!
+
+
 --0.99_5b for 0.15.8
   - now actually changing the stock (>.<)
 
